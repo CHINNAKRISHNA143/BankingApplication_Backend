@@ -3,6 +3,7 @@ package com.bank;
 import java.math.BigDecimal;
 
 import com.bank.exceptions.AccountNotFoundException;
+import com.bank.exceptions.InsufficientBalanceException;
 import com.bank.exceptions.InvalidAmountException;
 import com.bank.model.Account;
 import com.bank.repository.AccountRepository;
@@ -23,9 +24,15 @@ public class TransactionTest {
 		try {
 			
 			Account account1 = accountService.createAccount("Krish", "krish@gmail.com", new BigDecimal("5000"));
-			trxService.withdraw(account1.getAccountNumber(), new BigDecimal("500"));
+			Account account2 = accountService.createAccount("Madhu", "madhu@gmail.com", new BigDecimal("2000"));
+		//	trxService.withdraw(account1.getAccountNumber(), new BigDecimal("500"));
 			
-		} catch (InvalidAmountException | AccountNotFoundException e) {
+			trxService.transfer(account1.getAccountNumber(), account2.getAccountNumber(), new BigDecimal("1000"));
+			
+			System.out.println(account1.getOpeningBalance());//4000
+			System.out.println(account2.getOpeningBalance());//3000
+			
+		} catch (InvalidAmountException | AccountNotFoundException | InsufficientBalanceException e) {
 			 
 			e.printStackTrace();
 		}
