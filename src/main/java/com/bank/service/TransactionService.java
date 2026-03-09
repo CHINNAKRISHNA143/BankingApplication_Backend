@@ -7,6 +7,7 @@ import com.bank.exceptions.InsufficientBalanceException;
 import com.bank.exceptions.InvalidAmountException;
 import com.bank.model.Account;
 import com.bank.repository.TransactionRepository;
+import com.bank.util.FileReportUtil;
 
 public class TransactionService {
 	
@@ -30,6 +31,7 @@ public class TransactionService {
 		Account account = accountService.getAccount(accNo);
 		account.credit(amount);
 		txRepo.logTransaction("DEPOSITE", accNo, amount.doubleValue(), null);
+		FileReportUtil.writeLine("DEPOSITE | Acc: "+accNo+" | Amount: "+amount);
 		System.out.println("Deposited : "+amount+" to "+accNo);
 		
 	}
@@ -50,6 +52,7 @@ public class TransactionService {
 		
 		account.debit(amount);
 		txRepo.logTransaction("WITHDRAW", accNo, amount.doubleValue(), null);
+		FileReportUtil.writeLine("WITHDRAW | Acc: "+accNo+" | Amount: "+amount);
 		System.out.println("Withdraw : "+amount+" to "+accNo);
 		
 	}
@@ -71,6 +74,7 @@ public class TransactionService {
 		receiver.credit(amount);
 		
 		txRepo.logTransaction("TRANSFER", fromAcc, amount.doubleValue(), toAcc);
+		FileReportUtil.writeLine("TRANSFER | Acc: "+fromAcc+" | Amount: "+amount+" | to "+toAcc);
 		System.out.println(amount +" Transfer Successfull from : "+fromAcc+" to "+toAcc);
 	}
 	
