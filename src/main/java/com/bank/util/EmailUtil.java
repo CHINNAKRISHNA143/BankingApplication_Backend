@@ -3,9 +3,11 @@ package com.bank.util;
 import java.util.Properties;
 
 import jakarta.mail.Authenticator;
+import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
+import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 
@@ -14,7 +16,7 @@ public class EmailUtil {
 	private static final String FROM_MAIL = "harikrishnahh403@gmail.com";
 	private static final String APP_PASSWORD = "rgwb fphd ucks xlab";
 	
-	public static void sendEmail(String email,String subject,String body){
+	public static void sendEmail(String to,String subject,String body){
 		
 		Properties props = new Properties();
 		props.put("mail.smtp.auth", "true");
@@ -32,14 +34,18 @@ public class EmailUtil {
 		try {
 			MimeMessage message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(FROM_MAIL));
-			//message.setRecipients(, null);
+			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+			message.setSubject(subject);
+			message.setText(body);
 			
+			Transport.send(message);
 			
-			
+			System.out.println("Email sent to: "+to);
+		 
 			
 		} catch (MessagingException e) {
 			 
-			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 	}
 

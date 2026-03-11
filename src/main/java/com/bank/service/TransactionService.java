@@ -13,10 +13,13 @@ public class TransactionService {
 	
 	private final AccountService accountService;
 	private final TransactionRepository txRepo;
+	private final AlertService alertservice;
 	
-	public TransactionService(AccountService accountService,TransactionRepository txRepo) {
+	
+	public TransactionService(AccountService accountService,TransactionRepository txRepo,AlertService alertservice) {
 		this.accountService = accountService;
 		this.txRepo = txRepo;
+		this.alertservice = alertservice;
 	}
 	
 	public void deposite(String accNo, BigDecimal amount) throws AccountNotFoundException, 
@@ -32,6 +35,8 @@ public class TransactionService {
 		account.credit(amount);
 		txRepo.logTransaction("DEPOSITE", accNo, amount.doubleValue(), null);
 		FileReportUtil.writeLine("DEPOSITE | Acc: "+accNo+" | Amount: "+amount);
+		alertservice.checkBalance(account);
+		
 		System.out.println("Deposited : "+amount+" to "+accNo);
 		
 	}
@@ -53,6 +58,9 @@ public class TransactionService {
 		account.debit(amount);
 		txRepo.logTransaction("WITHDRAW", accNo, amount.doubleValue(), null);
 		FileReportUtil.writeLine("WITHDRAW | Acc: "+accNo+" | Amount: "+amount);
+		
+		alertservice.checkBalance(account);
+		
 		System.out.println("Withdraw : "+amount+" to "+accNo);
 		
 	}
@@ -71,7 +79,9 @@ public class TransactionService {
 		}
 		
 		sender.debit(amount);
+		alertservice.checkBalance(sender);
 		receiver.credit(amount);
+		alertservice.checkBalance(receiver);
 		
 		txRepo.logTransaction("TRANSFER", fromAcc, amount.doubleValue(), toAcc);
 		FileReportUtil.writeLine("TRANSFER | Acc: "+fromAcc+" | Amount: "+amount+" | to "+toAcc);
