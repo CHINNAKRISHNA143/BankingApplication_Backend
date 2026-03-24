@@ -1,10 +1,9 @@
 package com.bank;
 
-import static spark.Spark.options;
-import static spark.Spark.port;
 import static spark.Spark.*;
 import java.math.BigDecimal;
 
+ 
 import com.bank.model.Account;
 import com.bank.repository.AccountRepository;
 import com.bank.repository.TransactionRepository;
@@ -30,17 +29,32 @@ public class ApiServer {
 		
 		post("/accounts/create",(req,res) -> {
 			res.type("application/json");
+			System.out.println("/accounts/create API Called.." );
 			AccountRequest data = gson.fromJson(req.body(),AccountRequest.class);
 			Account acc = accService.createAccount(data.name, data.email, data.balance);
 			return gson.toJson(acc);
 			
 		});
 		
+		 post("/transactions/deposite", (req, res) -> {
+	            System.out.println("/transactions/deposite api is called");
+
+	            TxRequest data = gson.fromJson(req.body(), TxRequest.class);
+	            trxService.deposite(data.accNo, data.amount);
+
+	            return "Deposite successfully..!";
+	        });
 		
+		post("/tranctions/withdraw",(req,res) ->{
+			System.out.println("/tranctions/withdraw API Called.." );
+			TxRequest data = gson.fromJson(req.body(), TxRequest.class);
+			trxService.withdraw(data.accNo, data.amount);
+			return "Withdraw Successfully..!";
+		});
 	}
 	
 	public static void enableCORS() {
-		options("/",(request,response) -> {
+		options("/*",(request,response) -> {
 			String reqheaders = request.headers("Access-Control-Request-Headers");
 			if(reqheaders != null) {
 				response.header("Access-Control-Allow-Headers", reqheaders);
@@ -67,6 +81,11 @@ public class ApiServer {
 		String name;
 		String email;
 		BigDecimal balance;
+	}
+	
+	static class TxRequest{
+		String accNo;
+		BigDecimal amount;
 	}
  
 
