@@ -51,6 +51,27 @@ public class ApiServer {
 			trxService.withdraw(data.accNo, data.amount);
 			return "Withdraw Successfully..!";
 		});
+		
+		post("/transactions/transfer",(req,res) ->{
+			System.out.println("/tranctions/transfer API Called.." );
+			TransferRequest data = gson.fromJson(req.body(), TransferRequest.class);
+			trxService.transfer(data.fromAcc, data.toAcc,data.amount);
+			return "Transfer Transaction Successfull..!";
+		});
+		
+		get("/accounts/all",(req,res) -> {
+			System.out.println("/accounts/all API is called");
+			res.type("application/json");
+			
+			return gson.toJson(accService.listAllAccounts());
+		});
+		
+		get("/accounts/:accNo",(req,res) -> {
+			String accNo = req.params("accNo");
+			Account account = accService.getAccount(accNo);
+			return gson.toJson(account);
+		});
+		
 	}
 	
 	public static void enableCORS() {
@@ -87,6 +108,31 @@ public class ApiServer {
 		String accNo;
 		BigDecimal amount;
 	}
- 
+	
+	static class TransferRequest{
+		String fromAcc;
+		String toAcc;
+		BigDecimal amount;
+		
+	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
