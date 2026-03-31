@@ -1,16 +1,26 @@
 package com.bank;
 
-import static spark.Spark.*;
+import static spark.Spark.before;
+import static spark.Spark.get;
+import static spark.Spark.options;
+import static spark.Spark.port;
+import static spark.Spark.post;
+
 import java.math.BigDecimal;
 
- 
+import com.bank.chatbot.ChatRequest;
+import com.bank.chatbot.ChatService;
+import com.bank.chatbot.ChatResponse;
 import com.bank.model.Account;
+import com.bank.model.User;
 import com.bank.repository.AccountRepository;
 import com.bank.repository.TransactionRepository;
 import com.bank.service.AccountService;
 import com.bank.service.AlertService;
+import com.bank.service.AuthService;
 import com.bank.service.TransactionService;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 
 public class ApiServer {
 	
@@ -26,6 +36,9 @@ public class ApiServer {
 		TransactionRepository trxRepo = new TransactionRepository();
 		AlertService alertService = new AlertService(new BigDecimal("1000"));
 		TransactionService trxService = new TransactionService(accService, trxRepo, alertService);
+		
+		AuthService authService = new AuthService();
+		ChatService chatService = new ChatService(accService, trxService);
 		
 		post("/accounts/create",(req,res) -> {
 			res.type("application/json");
@@ -45,7 +58,7 @@ public class ApiServer {
 	            return "Deposite successfully..!";
 	        });
 		
-		post("/tranctions/withdraw",(req,res) ->{
+		post("/transactions/withdraw",(req,res) ->{
 			System.out.println("/tranctions/withdraw API Called.." );
 			TxRequest data = gson.fromJson(req.body(), TxRequest.class);
 			trxService.withdraw(data.accNo, data.amount);
@@ -72,6 +85,32 @@ public class ApiServer {
 			return gson.toJson(account);
 		});
 		
+		 post("/auth/register", (req, res) -> {
+	            User user = gson.fromJson(req.body(), User.class);
+	            authService.register(user);
+	            return "Registered successfully";
+	        });
+
+	        post("/auth/login", (req, res) -> {
+	            LoginRequest data = gson.fromJson(req.body(), LoginRequest.class);
+	            User user = authService.login(data.email, data.password);
+	            return gson.toJson(user);
+	        });
+	        
+	        
+	        post("/chat", (req, res) -> {
+	            res.type("application/json");
+
+	            ChatRequest request = gson.fromJson(req.body(), ChatRequest.class);
+	            String reply = chatService.processMessage(request.message);
+
+	            return gson.toJson(new ChatResponse(reply));
+	        });
+		
+	        post("/chat/reset", (req, res) -> {
+	            chatService.reset();
+	            return "Chat reset successful!";
+	        });
 	}
 	
 	public static void enableCORS() {
@@ -115,8 +154,15 @@ public class ApiServer {
 		BigDecimal amount;
 		
 	}
+	
+	static class LoginRequest{
+		String email;
+		String password;
+		
+	}
 
 }
+
 
 
 
